@@ -1,0 +1,72 @@
+
+# This is how you write comments
+# Inline comments are not Supported
+# So make sure commented lines start with '#'
+
+label start
+	"This is a text based interactive dialogue system."
+	"Even though main purpose is creating dialogues for visual novels, it should work as intended for any type of game with little modification to UI"
+	"No scripts needed for this to work"
+	# will show files screenshot here
+	"You only need at least one file for dialogues and one optional file for definitions if you need them"
+	"Example files have '.dlg' extension for clarity, yet, it should work with '.txt' or any TextAsset type Unity supports"
+	# will show screenshot of definition file
+	"This is what a definition file looks like"
+	"Keyword 'define' used to define characters. define keyword followed by your custom definition"
+	# will show part of dialogue file on the right side
+	"This definition will make writing dialogues easier as you can see on the right side"
+	dev "The last part of character definition is color code in 'html color code'. Character name will be shown in this color"
+	idev "This is how 'idev' looks like. "
+	idev "But be aware italic and other tags like <b>will work</b> for <color=green>TextMeshPro</color> since it will handle those itself, if you change UI, be careful about it!"
+	# will show variable definition
+	"Keyword 'default' allows you to define variables with a default value. Supported types are integer, string and boolean"
+	"Simply write default value; any number for integer, 'True' or 'False' for boolean and any text in quotes for string"
+	"These variables are available to use during runtime. I will show some examples in a minute"
+	"A dialouge file looks like this. Parts of the dialogue can be separated by labels"
+	"By default the dialogue will start from, 'label start'"
+	"In dialogues you can show value of a variable by simply writing like this; {moneyAmount}"
+	"Also you can use actions to change values of these variables. A variable modification action is defined by character '$' for example;"
+	"Currently you have {moneyAmount} money"
+	$ moneyAmount += 50
+	"Now that I have given you 50 more, you have {moneyAmount} money"
+	"Supported operations are; addition (+=), substraction (-=), division (/=), multiplication (*=) and equals (=) which meaning you are giving it a completely new value"
+	"Another action you will use is 'jump' keyword followed by a scene label"
+	"For example 'jump start' will get you to the beginning. I will also show that soon"
+	"You might need conditinal sentences you want to show only if conditions are met"
+	"You can do that with if blocks. For example;"
+	if moneyAmount > 50
+		"You can see this part since your money is over 50, which is {moneyAmount}"
+		$ moneyAmount -= 10
+		"As you can see, you can also add actions here too"
+		"As long as the lines are indented after 'if', 'elif' or 'else' those lines will be accounted for condition block"
+	elif moneyAmount == 50
+		"You will see this line instead if your money equals 50"
+	else 
+		"If both conditions were not met, you would see this line"
+	"Since this line is not indented, this in not part of the conditional block"
+	"'elif' and 'else' blocks are optional and not required everytime"
+	"Another thing to learn is menus. A menu is when you give player options to choose from"
+	"You can start a menu block by 'menu:' keyword. For example;"
+	menu:
+		"Choosing this option will send you to the beginning"
+			jump start
+		"This option has no actions, so, nothing will happen"
+		"This option will give you 500 money"
+			$ moneyAmount += 500
+	dev "Lastly, you can place a menu inside an if block, if you want that menu to be shown depending on the conditions"
+	# show indent pic
+	dev "Be careful with indentation, it is not strict with space amount, but menus and if blocks will continue until they find a line that matches their indent"
+	dev "Rule of thumb is; 'if' 'elif' 'else' 'menu:' keywords must be aligned with dialogue."
+	dev "Conditional parts must be indented respective to the 'if' 'elif' and 'else'"
+	dev "Options must be indented respective to the 'menu:' keyword. Actions of these options must be indented respective to those options"
+	dev "You have finished the tutorial. Have fun!"
+
+label second
+	dev "Oh, you came here"
+	dev "If you have not specified a scene using jump keyword at the end, it will try to find the next label on the same file"
+	dev "If it reaches the end of the file without finding a scene it will jump to another scene on the next file if it exist"
+	dev "Otherwise, it will simply end the dialogue"
+	
+
+
+
