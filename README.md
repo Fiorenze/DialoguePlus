@@ -1,7 +1,7 @@
 # DialoguePlus
 A simple, customizable dialogue engine for Unity — inspired by Ren'Py-style markup, but written entirely from scratch in C#.  
-It’s designed for narrative-driven interactive games where you want flexible conditions, variables, branching choices, and inline actions.
-See DemoDialogue.dlg for more information about current capabilties (WIP)
+- It’s designed for narrative-driven interactive games where you want flexible conditions, variables, branching choices, and inline actions.
+- See DemoDialogue.dlg for more information about current capabilties (WIP)
 
 ---
 
@@ -37,13 +37,13 @@ This is a **work in progress**!
 ```plaintext
 label start
 
-	"System" "This is a text based interactive dialogue system."
+	System "This is a text based interactive dialogue system."
 
-	"System" "You can define; bool, integer and names."
+	System "You can define; bool, integer and names."
 	
-	"System" "You can also interact with them in dialogue."
+	System "You can also interact with them in dialogue."
 	
-	"System" "For example, {score} will show the value of 'score'."
+	System "For example, {score} will show the value of 'score'."
 
 	menu:
 		"This option will increase score by 50"
@@ -52,7 +52,7 @@ label start
 			$score = 100
 		"This option only shows if score >= 500" if score >= 500
 		
-jump nextScene
+	jump nextScene
 
 label nextScene
 
