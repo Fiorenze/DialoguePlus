@@ -24,11 +24,11 @@ A simple, customizable dialogue engine for Unity — inspired by Ren'Py-style ma
 This is a **work in progress**!  
 ✔️ Core parser works: labels, dialogue lines, variables, conditions, menus  
 ✔️ Supports runtime variable injection and actions
+✔️ Supports rollback
 
 ❌ **Not implemented yet:**
 - Changing scenes or backgrounds (`scene` command)
 - Showing/hiding character images (`show` / `hide`)
-- Rollback system
 
 ---
 
@@ -51,10 +51,11 @@ label start
 		"Set score to 100"
 			$score = 100
 		"This option only shows if score >= 500" if score >= 500
+			"You will see this only if you have chosen third option"
 		
 	jump nextScene
 
 label nextScene
 
-	"System" "You jumped to the next scene!"
+	"You jumped to the next scene!"
 ```
