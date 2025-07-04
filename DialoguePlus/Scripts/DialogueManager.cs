@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 namespace DialoguePlus
 {
@@ -23,38 +24,52 @@ namespace DialoguePlus
 
         [SerializeField] private TextAsset[] DialogueFiles;
         [SerializeField] private TextAsset[] DefinitionFiles;
-        [SerializeField] private DialogueUI dialogueUI;
+        public DialogueUI dialogueUI;
 
         public DialogueEngine DialogueEngine { get; private set; }
-        public DialogueReader DialogueReader { get; private set; }
 
 
         void Start()
         {
-            DialogueEngine = new()
+            VariableManager.Init();
+            SceneManager.Init();
+
+            foreach (TextAsset textAsset in DefinitionFiles)
             {
-                DialogueFiles = DialogueFiles,
-                DefinitionFiles = DefinitionFiles
-            };
+                FileReader.ReadDefinitionFile(textAsset);
+            }
+            foreach (TextAsset textAsset in DialogueFiles)
+            {
+                FileReader.ReadDialogueFile(textAsset);
+            }
 
-            DialogueReader = new DialogueReader(dialogueUI);
-
+            DialogueEngine = new();
             DialogueEngine.Init();
+
         }
         private void Update()
         {
             // Will separate input in the future
-            if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Q))
+
+            if (!EventSystem.current.IsPointerOverGameObject(0))
+            {
+                if (Input.GetKeyDown(KeyCode.Mouse0))
+                {
+                    if (!dialogueUI.IsWaitingForAnswer)
+                        DialogueEngine.AdvanceDialogue();
+                }
+            }
+            if (Input.GetKeyDown(KeyCode.E))
             {
                 if (!dialogueUI.IsWaitingForAnswer)
-                    DialogueReader.Progress();
+                    DialogueEngine.AdvanceDialogue();
+            }
+            if (Input.GetKeyDown(KeyCode.Q) || Input.mouseScrollDelta.y > 0)
+            {
+                DialogueEngine.Rollback();
             }
         }
 
-        void OnDestroy()
-        {
-            DialogueReader.OnDestroy();
-        }
     }
 }
 

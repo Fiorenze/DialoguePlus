@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DialoguePlus
@@ -7,7 +8,7 @@ namespace DialoguePlus
         public static bool IsMatch(string line)
             => RegexPatterns.IfBlockPattern.IsMatch(line.Trim());
 
-        public static (DialogueNode, int) Parse(string[] lines, int startIndex, DialogueEngine engine)
+        public static (DialogueNode, int) Parse(string[] lines, int startIndex)
         {
             int i = startIndex;
             int baseIndent = IndentUtils.GetIndentLevel(lines[startIndex]);
@@ -19,8 +20,8 @@ namespace DialoguePlus
                 endLine++;
             }
 
-            DialogueNode completeNode = new() { Speaker = string.Empty, Text = string.Empty };
-            DialogueNodeTree newTree = new();
+            IfBlockNode completeNode = new();
+            List<DialogueNodeBranch> branches = new();
             DialogueNodeBranch newBranch = new() { Condition = string.Empty };
 
             while (i < endLine)
@@ -43,7 +44,7 @@ namespace DialoguePlus
                     // This means last condition block is complete
                     if (newBranch.Condition != string.Empty)
                     {
-                        newTree.branches.Add(newBranch);
+                        branches.Add(newBranch);
                         newBranch = new() { Condition = string.Empty };
                     }
 
@@ -51,7 +52,7 @@ namespace DialoguePlus
                 }
                 else if (MenuBlockParser.IsMatch(currentLine))
                 {
-                    var (menuNode, newIndex) = MenuBlockParser.Parse(lines, i, engine);
+                    var (menuNode, newIndex) = MenuBlockParser.Parse(lines, i);
                     i = newIndex;
                     newBranch.BranchNodes.Add(menuNode);
                 }
@@ -62,22 +63,14 @@ namespace DialoguePlus
                 }
                 else if (VariableActionParser.IsMatch(currentLine))
                 {
-                    var parsedAction = VariableActionParser.Parse(currentLine);
+                    var dialogueNode = VariableActionParser.Parse(currentLine);
 
-                    DialogueNode dialogueNode = new()
-                    {
-                        Action = parsedAction
-                    };
                     newBranch.BranchNodes.Add(dialogueNode);
                 }
                 else if (CommandActionParser.IsMatch(currentLine))
                 {
-                    var parsedAction = CommandActionParser.Parse(currentLine);
+                    var dialogueNode = CommandActionParser.Parse(currentLine);
 
-                    DialogueNode dialogueNode = new()
-                    {
-                        Action = parsedAction
-                    };
                     newBranch.BranchNodes.Add(dialogueNode);
                 }
                 else
@@ -89,9 +82,9 @@ namespace DialoguePlus
             }
 
             // Last condition block is not added before here
-            newTree.branches.Add(newBranch);
+            branches.Add(newBranch);
 
-            completeNode.DialogueNodeTree = newTree;
+            completeNode.DialogueNodeBranches = branches;
             return (completeNode, endLine - 1);
 
         }

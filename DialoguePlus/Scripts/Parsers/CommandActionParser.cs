@@ -4,13 +4,24 @@ namespace DialoguePlus
 {
     public static class CommandActionParser
     {
-        // Even though we don't do any operation, we validate the format of the line
         public static bool IsMatch(string line)
             => RegexPatterns.CommandActionPattern.IsMatch(line.Trim());
 
-        public static string Parse(string line)
+        public static DialogueNode Parse(string line)
         {
-            return line.Trim();
+            // group 1 = action, group 2 = text (can be scene label, image reference etc.)
+            var match = RegexPatterns.CommandActionPattern.Match(line);
+
+            string action = match.Groups[1].Value;
+            string text = match.Groups[2].Value;
+
+            CommandActionNode node = new()
+            {
+                Command = action,
+                Text = text
+            };
+
+            return node;
         }
     }
 }

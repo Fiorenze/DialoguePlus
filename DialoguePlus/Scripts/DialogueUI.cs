@@ -22,8 +22,18 @@ namespace DialoguePlus
 
         private Coroutine TextWriter;
 
+        void Start()
+        {
+            DialogueEngine.Instance.OnDialogueEnd += EndDialogue;
+        }
+        void OnDestroy()
+        {
+            DialogueEngine.Instance.OnDialogueEnd -= EndDialogue;
+        }
+
         public void DisplaySentence(DialogueNode node)
         {
+            QuestionPanel.SetActive(false);
             DialoguePanel.SetActive(true);
 
             if (TextWriter != null)
@@ -31,23 +41,19 @@ namespace DialoguePlus
                 StopCoroutine(TextWriter);
             }
 
-            TextWriter = StartCoroutine(TypeSentence(node.Speaker, node.Text));
-            NameText.color = node.SpeakerColor;
-
-            if (node.Menu.Options != null && node.Menu.Options.Count > 0)
+            if (node is DialogueLineNode n)
             {
-                DisplayQuestionPanel(node);
+                TextWriter = StartCoroutine(TypeSentence(n.Speaker, n.DisplayText));
+                NameText.color = n.SpeakerColor;
+            }
+            else if (node is MenuNode m)
+            {
+                DisplayQuestionPanel(m);
             }
         }
 
         private IEnumerator TypeSentence(string _name, string sentence)
         {
-            if (sentence == "endDialogue")
-            {
-                EndDialogue();
-                yield break;
-            }
-
             DialogueText.text = "";
             NameText.text = _name;
 
@@ -58,8 +64,8 @@ namespace DialoguePlus
             }
         }
 
-        private DialogueNode currentMenuNode;
-        private void DisplayQuestionPanel(DialogueNode node)
+        private MenuNode currentMenuNode;
+        private void DisplayQuestionPanel(MenuNode node)
         {
             currentMenuNode = node;
 
@@ -71,22 +77,22 @@ namespace DialoguePlus
                 button.SetActive(false);
             }
 
-            for (int i = 0; i < node.Menu.Options.Count; i++)
+            for (int i = 0; i < node.Options.Count; i++)
             {
                 OptionButtons[i].SetActive(true);
                 OptionButtons[i].GetComponent<Button>().interactable = true;
-                OptionButtons[i].GetComponentInChildren<TextMeshProUGUI>().text = node.Menu.Options[i].Text;
+                OptionButtons[i].GetComponentInChildren<TextMeshProUGUI>().text = node.Options[i].Text;
 
-                if (node.Menu.Options[i].SoftConditions.Count > 0)
+                if (node.Options[i].SoftConditions.Count > 0)
                 {
-                    if (!DialogueEngine.Instance.CheckSoftConditions(node.Menu.Options[i].SoftConditions))
+                    if (!DialogueEngine.Instance.CheckSoftConditions(node.Options[i].SoftConditions))
                     {
                         OptionButtons[i].GetComponent<Button>().interactable = false;
                     }
                 }
-                else if (node.Menu.Options[i].HardConditions.Count > 0)
+                else if (node.Options[i].HardConditions.Count > 0)
                 {
-                    if (!DialogueEngine.Instance.CheckHardConditions(node.Menu.Options[i].HardConditions))
+                    if (!DialogueEngine.Instance.CheckHardConditions(node.Options[i].HardConditions))
                     {
                         OptionButtons[i].GetComponent<Button>().interactable = false;
                     }
@@ -98,15 +104,10 @@ namespace DialoguePlus
         {
             if (!QuestionPanel.activeSelf) return;
 
-            foreach (string action in currentMenuNode.Menu.Options[optionnum].Actions)
-            {
-                DialogueEngine.Instance.ExecuteAction(action);
-            }
-
             QuestionPanel.SetActive(false);
-            DialoguePanel.SetActive(true);
+            DialoguePanel.SetActive(false);
 
-            DialogueManager.Instance.DialogueReader.Progress();
+            currentMenuNode.ChooseOption(optionnum);
         }
 
         public void EndDialogue()

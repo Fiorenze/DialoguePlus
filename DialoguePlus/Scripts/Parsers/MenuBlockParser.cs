@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,21 +9,27 @@ namespace DialoguePlus
         public static bool IsMatch(string line)
             => RegexPatterns.MenuPattern.IsMatch(line.Trim());
 
-        public static (DialogueNode, int) Parse(string[] lines, int startIndex, DialogueEngine engine)
+        public static (DialogueNode, int) Parse(string[] lines, int startIndex)
         {
             int i = startIndex;
             int baseIndent = IndentUtils.GetIndentLevel(lines[startIndex]);
-            int optionIndent = IndentUtils.GetIndentLevel(lines[startIndex + 1]);
+            //int optionIndent = IndentUtils.GetIndentLevel(lines[startIndex + 1]);
+            int optionIndent = -1;
 
             // find last line of menu block
             int endLine = startIndex + 1;
             while (endLine < lines.Length && IndentUtils.GetIndentLevel(lines[endLine]) > baseIndent)
             {
+                if (optionIndent == -1 && MenuOptionParser.IsMatch(lines[endLine].Trim()))
+                {
+                    optionIndent = IndentUtils.GetIndentLevel(lines[endLine]);
+                }
                 endLine++;
             }
 
-            DialogueNode completeNode = new() { Speaker = string.Empty, Text = string.Empty };
-            DialogueMenu menu = new();
+            MenuNode completeNode = new();
+            List<DialogueOption> options = new();
+
             DialogueOption dialogueOption = new();
 
             while (++i < endLine)
@@ -32,12 +39,12 @@ namespace DialoguePlus
                 if (string.IsNullOrEmpty(currentLine)) continue;
                 if (currentLine.StartsWith('#')) continue;
 
-                if (MenuOptionParser.IsMatch(currentLine))
+                if (MenuOptionParser.IsMatch(currentLine) && IndentUtils.GetIndentLevel(lines[i]) == optionIndent)
                 {
                     // This means last option block is complete
-                    if (!string.IsNullOrEmpty(dialogueOption.Text))
+                    if (options.Count > 0 || !string.IsNullOrEmpty(dialogueOption.Text))
                     {
-                        menu.Options.Add(dialogueOption);
+                        options.Add(dialogueOption);
                         dialogueOption = new();
                     }
 
@@ -47,24 +54,30 @@ namespace DialoguePlus
                     if (condition != string.Empty)
                         dialogueOption.HardConditions.Add(condition);
                 }
+                else if (LineParser.IsMatch(currentLine) && IndentUtils.GetIndentLevel(lines[i]) > optionIndent)
+                {
+                    var parsedLine = LineParser.Parse(currentLine);
+                    dialogueOption.Branch.BranchNodes.Add(parsedLine);
+                }
                 else if (VariableActionParser.IsMatch(currentLine))
                 {
                     var parsedAction = VariableActionParser.Parse(currentLine);
-                    dialogueOption.Actions.Add(parsedAction);
+                    dialogueOption.Branch.BranchNodes.Add(parsedAction);
                 }
                 else if (CommandActionParser.IsMatch(currentLine))
                 {
                     var parsedAction = CommandActionParser.Parse(currentLine);
-                    dialogueOption.Actions.Add(parsedAction);
+                    dialogueOption.Branch.BranchNodes.Add(parsedAction);
                 }
                 else
                 {
-                    Debug.LogError($"Unknown line inside menu block: '{currentLine}'");
+                    Debug.LogError($"Unknown line inside menu option: '{currentLine}'");
                 }
             }
+            // Last option block is not added before here
+            options.Add(dialogueOption);
 
-            menu.Options.Add(dialogueOption);
-            completeNode.Menu = menu;
+            completeNode.Options = options;
 
             return (completeNode, endLine - 1);
         }
