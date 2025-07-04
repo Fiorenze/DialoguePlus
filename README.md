@@ -1,5 +1,5 @@
 # DialoguePlus
-A simple, customizable dialogue engine for Unity — inspired by Ren'Py-style markup, but written entirely from scratch in C#.  
+A simple, customizable dialogue engine for Unity — inspired by Ren'Py-style markup, but written entirely from scratch in C#.
 - It’s designed for narrative-driven interactive games where you want flexible conditions, variables, branching choices, and inline actions.
 - See DemoDialogue.dlg for more information about current capabilties (WIP)
 
@@ -23,7 +23,7 @@ A simple, customizable dialogue engine for Unity — inspired by Ren'Py-style ma
 
 This is a **work in progress**!  
 ✔️ Core parser works: labels, dialogue lines, variables, conditions, menus  
-✔️ Supports runtime variable injection and actions
+✔️ Supports runtime variable injection and actions\
 ✔️ Supports rollback
 
 ❌ **Not implemented yet:**
