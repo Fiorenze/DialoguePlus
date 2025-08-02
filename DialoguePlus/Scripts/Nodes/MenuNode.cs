@@ -1,18 +1,23 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace DialoguePlus
 {
     public class MenuNode : DialogueNode
     {
         public override bool IsDisplayable => true;
+        public override string Info => $"Menu with {OptionCount} options";
+
+
+        public int OptionCount => Options.Count;
+        public List<MenuOption> Options { get; private set; } = new();
+
 
         private DialogueEngine engine;
 
         public override void Execute(DialogueEngine engine)
         {
             this.engine = engine;
-            DialogueManager.Instance.dialogueUI.DisplaySentence(this);
+            engine.DisplaySentence(this);
         }
 
         public override void Undo(DialogueEngine engine)
@@ -27,14 +32,10 @@ namespace DialoguePlus
             engine.EnterBranch(chosenBranch);
         }
 
-        public List<DialogueOption> Options = new();
-    }
+        public void SetOptions(List<MenuOption> options)
+        {
+            Options = options;
+        }
 
-    public class DialogueOption
-    {
-        public string Text { get; set; }
-        public List<string> SoftConditions = new();
-        public List<string> HardConditions = new();
-        public DialogueNodeBranch Branch { get; set; } = new();
     }
 }

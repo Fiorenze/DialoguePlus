@@ -5,5 +5,8 @@ define dev = "Developer" , #FF0000
 define idev="<i>Developer2</i>",#BAA65C
 
 default moneyAmount = 10
-default firstTime = True
+default hasLemon = False
 default playedBefore = False
+
+
+

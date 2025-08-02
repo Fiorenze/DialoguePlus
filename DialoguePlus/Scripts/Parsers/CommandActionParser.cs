@@ -9,19 +9,34 @@ namespace DialoguePlus
 
         public static DialogueNode Parse(string line)
         {
-            // group 1 = action, group 2 = text (can be scene label, image reference etc.)
+            // group 1 = action, group 2 = sceneLabel
             var match = RegexPatterns.CommandActionPattern.Match(line);
 
             string action = match.Groups[1].Value;
             string text = match.Groups[2].Value;
 
-            CommandActionNode node = new()
+            if (action == "call")
             {
-                Command = action,
-                Text = text
-            };
-
-            return node;
+                CallActionNode callNode = new()
+                {
+                    SceneLabel = text
+                };
+                return callNode;
+            }
+            else if (action == "jump")
+            {
+                JumpActionNode jumpNode = new()
+                {
+                    SceneLabel = text
+                };
+                return jumpNode;
+            }
+            else
+            {
+                // It should never get here
+                Debug.LogError("Unknown command action!");
+                return null;
+            }
         }
     }
 }

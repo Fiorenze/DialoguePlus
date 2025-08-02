@@ -11,7 +11,9 @@ namespace DialoguePlus
         public static void ReadDialogueFile(TextAsset textAsset)
         {
             string[] stringToArray = textAsset.text.Split('\n', System.StringSplitOptions.RemoveEmptyEntries);
+            stringToArray = PreprocessLines(stringToArray);
 
+            // Find indexes of labels in the file
             List<LabelIndex> labelIndexes = IndexLabels(stringToArray);
 
             int sceneEndIndex;
@@ -20,48 +22,37 @@ namespace DialoguePlus
             {
                 LabelIndex labelIndex = labelIndexes[i];
 
-                // If not the last label, set the end index to the next label's start index
+                // If we are not at the last label yet,
+                // set the end index to next label's start index
                 if (i < labelIndexes.Count - 1)
                 {
-                    sceneEndIndex = labelIndexes[i + 1].startIndex - 1;
+                    sceneEndIndex = labelIndexes[i + 1].startIndex;
                 }
                 else
                 {
-                    // If it's the last label, set the end index to the end of the array
+                    // If it's the last label, 
+                    // set the end index to the end of the array
                     sceneEndIndex = stringToArray.Length;
                 }
 
                 // Extract scene data for this label
                 SceneData sceneData = ExtractSceneData(stringToArray, labelIndex.startIndex, sceneEndIndex);
-                SceneManager.AddScene(sceneData);
+                SceneDatabase.AddScene(sceneData);
             }
         }
 
         public static SceneData ExtractSceneData(string[] sceneTextArray, int startIndex, int endIndex)
         {
-            SceneData sceneData = new();
+            SceneData sceneData = new()
+            {
+                SceneLabel = ExtractLabel(sceneTextArray[startIndex])
+            };
 
             int i = startIndex;
 
-            while (i < endIndex)
+            while (++i < endIndex)
             {
                 string line = sceneTextArray[i].Trim();
-
-                // Ignore comments and empty lines
-                if (line.Trim().StartsWith("#") || string.IsNullOrEmpty(line.Trim()))
-                {
-                    i++;
-                    continue;
-                }
-                if (RegexPatterns.LabelPattern.IsMatch(line))
-                {
-                    // group 1 = label
-                    var Match = RegexPatterns.LabelPattern.Match(line);
-                    string label = Match.Groups[1].Value;
-                    sceneData.SceneLabel = label;
-                    i++;
-                    continue;
-                }
 
                 if (LineParser.IsMatch(line))
                 {
@@ -89,19 +80,27 @@ namespace DialoguePlus
                     DialogueNode dialogueNode = CommandActionParser.Parse(line);
                     sceneData.Nodes.Add(dialogueNode);
                 }
+                else if (RegexPatterns.ReturnPattern.IsMatch(line))
+                {
+                    sceneData.Nodes.Add(new ReturnNode());
+                }
                 else
                 {
                     Debug.LogWarning($"Don't know what to do with this line '{line}'");
                     return null;
                 }
-
-                i++;
             }
 
             return sceneData;
         }
 
-        public static List<LabelIndex> IndexLabels(string[] sceneTextArray)
+        private static string ExtractLabel(string line)
+        {
+            var Match = RegexPatterns.LabelPattern.Match(line.Trim());
+            return Match.Groups[1].Value;
+        }
+
+        private static List<LabelIndex> IndexLabels(string[] sceneTextArray)
         {
             List<LabelIndex> indexList = new();
 
@@ -137,21 +136,17 @@ namespace DialoguePlus
         public static void ReadDefinitionFile(TextAsset textAsset)
         {
             string[] stringToArray = textAsset.text.Split('\n', System.StringSplitOptions.RemoveEmptyEntries);
+            stringToArray = PreprocessLines(stringToArray);
 
             foreach (string line in stringToArray)
             {
-                // Ignore comments and empty lines
-                if (line.Trim().StartsWith("#") || string.IsNullOrEmpty(line.Trim()))
-                {
-                    continue;
-                }
                 if (RegexPatterns.CharacterDefinitionPattern.IsMatch(line.Trim()))
                 {
-                    VariableManager.RegisterCharacterDefinition(line.Trim());
+                    VariableDatabase.RegisterCharacterDefinition(line.Trim());
                 }
                 else if (RegexPatterns.VariableDefinitionPattern.IsMatch(line.Trim()))
                 {
-                    VariableManager.RegisterVariableDefinition(line.Trim());
+                    VariableDatabase.RegisterVariableDefinition(line.Trim());
                 }
                 else
                 {
@@ -161,6 +156,22 @@ namespace DialoguePlus
         }
 
         #endregion
+
+        // Clear spaces and comments
+        private static string[] PreprocessLines(string[] stringArray)
+        {
+            List<string> result = new();
+
+            foreach (string line in stringArray)
+            {
+                if (string.IsNullOrWhiteSpace(line.Trim())) continue;
+                if (line.Trim().StartsWith("#")) continue;
+
+                result.Add(line);
+            }
+
+            return result.ToArray();
+        }
     }
 
     public class LabelIndex

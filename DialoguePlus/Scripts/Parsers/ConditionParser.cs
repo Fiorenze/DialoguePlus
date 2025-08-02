@@ -30,10 +30,7 @@ namespace DialoguePlus
                 Debug.LogError("Something went wrong");
                 return null;
             }
-
         }
-
-
     }
 }
 

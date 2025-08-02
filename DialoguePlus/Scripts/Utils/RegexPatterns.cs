@@ -4,6 +4,9 @@ namespace DialoguePlus
 {
     public static class RegexPatterns
     {
+        // group 1 = label
+        public static Regex LabelPattern = new(@"^label\s+(\w+)$");
+
         // group 1 = condition
         public static Regex IfBlockPattern = new(@"^if\s+(.+)$");
 
@@ -12,14 +15,13 @@ namespace DialoguePlus
         // group 1 = text, group 2 = condition (optional)
         public static Regex MenuOptionPattern = new(@"^""([^""]+)""(?:\s+if\s+(.+))?$");
 
-        // group 1 = label
-        public static Regex LabelPattern = new(@"^label\s+(\w+)$");
-
         // group 1 = action, group 2 = operation, group 3 = modifier
         public static Regex VariableActionPattern = new(@"^\$\s*(\w+)\s*(=|\+=|-=|\*=|/=)\s*(.+?)$");
 
-        // group 1 = action, group 2 = text (can be scene label, image reference etc.)
-        public static Regex CommandActionPattern = new(@"^(jump|label|scene|show|hide)\s+(.+)$");
+        // group 1 = action, group 2 = text (scene label)
+        public static Regex CommandActionPattern = new(@"^(jump|call)\s+(.+?)$");
+
+        public static Regex ReturnPattern = new(@"^return$");
 
         // group 1 = speaker (optional), group 2 = text
         public static Regex LinePattern = new(@"^(?:\s*(\w+)\s+)?\""(.*?)\""$");
@@ -33,7 +35,6 @@ namespace DialoguePlus
 
         // group 1 = name, group 2 = value
         public static Regex VariableDefinitionPattern = new(@"^default\s+(\w+)\s*=\s*(.+)$");
-
     }
 }
 

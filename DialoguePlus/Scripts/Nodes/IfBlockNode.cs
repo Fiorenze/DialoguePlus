@@ -1,17 +1,19 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace DialoguePlus
 {
     public class IfBlockNode : DialogueNode
     {
         public override bool IsDisplayable => true;
+        public override string Info => $"If with {BranchCount} branches";
+
+
+        public int BranchCount => DialogueNodeBranches.Count;
+        public List<DialogueNodeBranch> DialogueNodeBranches { get; private set; } = new();
 
         public override void Execute(DialogueEngine engine)
         {
-            this.engine = engine;
             DialogueNodeBranch branch = SelectTreeBranch();
-
             engine.EnterBranch(branch);
         }
 
@@ -20,27 +22,21 @@ namespace DialoguePlus
             engine.ExitBranch();
         }
 
-        public List<DialogueNodeBranch> DialogueNodeBranches = new();
-
-        // Logic
-        DialogueEngine engine;
+        public void SetBranches(List<DialogueNodeBranch> branches)
+        {
+            DialogueNodeBranches = branches;
+        }
 
         private DialogueNodeBranch SelectTreeBranch()
         {
             foreach (DialogueNodeBranch branch in DialogueNodeBranches)
             {
-                if (engine.CheckCondition(branch.Condition))
+                if (ConditionEvaluator.CheckCondition(branch.Condition))
                 {
                     return branch;
                 }
             }
             return null;
         }
-    }
-
-    public class DialogueNodeBranch
-    {
-        public string Condition { get; set; }
-        public List<DialogueNode> BranchNodes = new();
     }
 }

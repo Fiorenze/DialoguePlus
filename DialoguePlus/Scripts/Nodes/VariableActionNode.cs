@@ -11,22 +11,24 @@ namespace DialoguePlus
         private object oldValue;
 
         public override bool IsDisplayable => false;
+        public override string Info => Variable + " " + Operation + " " + Modifier;
+
 
         public override void Execute(DialogueEngine engine)
         {
-            oldValue = VariableManager.GetVariableValue(Variable);
+            oldValue = VariableDatabase.GetVariableValue(Variable);
             object newValue = CalculateNewValue();
 
-            VariableManager.SetVariableValue(Variable, newValue);
+            VariableDatabase.SetVariableValue(Variable, newValue);
         }
         public override void Undo(DialogueEngine engine)
         {
-            VariableManager.SetVariableValue(Variable, oldValue);
+            VariableDatabase.SetVariableValue(Variable, oldValue);
         }
 
         private object CalculateNewValue()
         {
-            object currentValue = VariableManager.GetVariableValue(Variable);
+            object currentValue = VariableDatabase.GetVariableValue(Variable);
             object newValue = currentValue;
 
 

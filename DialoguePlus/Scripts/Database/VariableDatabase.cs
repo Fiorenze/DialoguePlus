@@ -4,10 +4,9 @@ using UnityEngine.Events;
 
 namespace DialoguePlus
 {
-    public static class VariableManager
+    public static class VariableDatabase
     {
-        public static List<CharacterDefinition> CharacterDefinitions { get; private set; } = new();
-        public static List<VariableDefinition> Variables { get; private set; } = new();
+        public static List<Variable> Variables { get; set; } = new();
 
         public static UnityAction OnVariablesUpdated;
 
@@ -15,7 +14,6 @@ namespace DialoguePlus
 
         public static void Init()
         {
-            CharacterDefinitions = new();
             Variables = new();
         }
 
@@ -29,6 +27,12 @@ namespace DialoguePlus
             string nameKey = Match.Groups[1].Value;
             string nameValue = Match.Groups[2].Value;
             string htmlColor = Match.Groups[3].Success ? Match.Groups[3].Value : string.Empty;
+
+            if (DoesExist(nameKey))
+            {
+                Debug.LogWarning($"Variable '{nameKey}' already exists!");
+                return;
+            }
 
             Color nameColor = Color.white;
 
@@ -45,7 +49,7 @@ namespace DialoguePlus
             }
 
             CharacterDefinition characterDefinition = new(nameKey, nameValue, nameColor);
-            CharacterDefinitions.Add(characterDefinition);
+            Variables.Add(characterDefinition);
 
             OnVariablesUpdated?.Invoke();
         }
@@ -60,6 +64,12 @@ namespace DialoguePlus
 
             string variableKey = Match.Groups[1].Value.Trim();
             string variableValue = Match.Groups[2].Value.Trim();
+
+            if (DoesExist(variableKey))
+            {
+                Debug.LogWarning($"Variable '{variableKey}' already exists!");
+                return;
+            }
 
             if (bool.TryParse(variableValue, out bool parsedBool))
             {
@@ -91,14 +101,21 @@ namespace DialoguePlus
 
         public static void SetVariableValue(string key, object value)
         {
-            if (Variables.Find(x => x.Key == key) == null)
+            var v = Variables.Find(x => x.Key == key);
+            if (v != null)
             {
-                Debug.LogError($"Variable '{key}' not found!");
+                v.Value = value;
+                OnVariablesUpdated?.Invoke();
                 return;
             }
-            Variables.Find(x => x.Key == key).Value = value;
 
-            OnVariablesUpdated?.Invoke();
+            Debug.LogError($"Variable '{key}' not found!");
+            return;
+        }
+
+        public static bool DoesExist(string Key)
+        {
+            return Variables.Find(x => x.Key == Key) != null;
         }
 
         #endregion
@@ -106,9 +123,8 @@ namespace DialoguePlus
     }
 
     [System.Serializable]
-    public class CharacterDefinition
+    public class CharacterDefinition : Variable
     {
-        public string Key, Value;
         public Color Color;
         public CharacterDefinition(string key, string value, Color color)
         {
@@ -118,14 +134,19 @@ namespace DialoguePlus
         }
     }
     [System.Serializable]
-    public class VariableDefinition
+    public class VariableDefinition : Variable
     {
-        public string Key;
-        public object Value;
         public VariableDefinition(string key, object value)
         {
             Key = key;
             Value = value;
         }
+    }
+
+    [System.Serializable]
+    public class Variable
+    {
+        public string Key;
+        public object Value;
     }
 }

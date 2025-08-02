@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace DialoguePlus
 {
@@ -28,16 +27,13 @@ namespace DialoguePlus
             }
 
             MenuNode completeNode = new();
-            List<DialogueOption> options = new();
+            List<MenuOption> options = new();
 
-            DialogueOption dialogueOption = new();
+            MenuOption dialogueOption = new();
 
             while (++i < endLine)
             {
                 string currentLine = lines[i].Trim();
-
-                if (string.IsNullOrEmpty(currentLine)) continue;
-                if (currentLine.StartsWith('#')) continue;
 
                 if (MenuOptionParser.IsMatch(currentLine) && IndentUtils.GetIndentLevel(lines[i]) == optionIndent)
                 {
@@ -51,8 +47,7 @@ namespace DialoguePlus
                     var (text, condition) = MenuOptionParser.Parse(currentLine);
                     dialogueOption.Text = text;
 
-                    if (condition != string.Empty)
-                        dialogueOption.HardConditions.Add(condition);
+                    dialogueOption.Condition = condition;
                 }
                 else if (LineParser.IsMatch(currentLine) && IndentUtils.GetIndentLevel(lines[i]) > optionIndent)
                 {
@@ -69,6 +64,10 @@ namespace DialoguePlus
                     var parsedAction = CommandActionParser.Parse(currentLine);
                     dialogueOption.Branch.BranchNodes.Add(parsedAction);
                 }
+                else if (RegexPatterns.ReturnPattern.IsMatch(currentLine))
+                {
+                    dialogueOption.Branch.BranchNodes.Add(new ReturnNode());
+                }
                 else
                 {
                     Debug.LogError($"Unknown line inside menu option: '{currentLine}'");
@@ -76,8 +75,8 @@ namespace DialoguePlus
             }
             // Last option block is not added before here
             options.Add(dialogueOption);
+            completeNode.SetOptions(options);
 
-            completeNode.Options = options;
 
             return (completeNode, endLine - 1);
         }

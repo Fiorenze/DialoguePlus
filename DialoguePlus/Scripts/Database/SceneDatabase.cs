@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace DialoguePlus
 {
-    public static class SceneManager
+    public static class SceneDatabase
     {
-        public static SceneList Scenes = new();
+        public static SceneList Scenes { get; private set; } = new();
 
         public static void Init()
         {

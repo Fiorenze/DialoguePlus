@@ -1,0 +1,42 @@
+
+label dev
+	"This is a test"
+	"To make sure everything works as intended"
+	call testMenu
+	"Money is, {moneyAmount}"
+	# Menu test
+	menu:
+		"Option with no action"
+		"Option with jump action"
+			jump second
+		"Option with +50 money"
+			"You chose getting 50 money"
+			$moneyAmount += 50
+		"Option with 2 actions, set 500 money, +20 money"
+			$ moneyAmount = 500
+			$moneyAmount += 20
+	"Now money is, {moneyAmount}"
+	#If test
+	if moneyAmount == 10
+		"Money is still, {moneyAmount}"
+	elif moneyAmount < 100
+		"Money is less then 100, :{moneyAmount}"
+	else
+		"This should mean money is 520, :{moneyAmount}"
+	"Test2: Dialogue with menu start"
+	jump devMenu
+	
+label devMenu
+	menu:
+		"Option with nothing"
+		"Yuppee"
+			$moneyAmount -= 50
+	jump dev2
+	
+label testMenu
+	menu:
+		"This is a test"
+			$moneyAmount = 50
+		"This is second option"
+	return
+	

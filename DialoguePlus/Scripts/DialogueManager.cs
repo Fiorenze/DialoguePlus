@@ -1,38 +1,23 @@
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 namespace DialoguePlus
 {
-    public class DialogueManager : MonoBehaviour
+    public class DialogueManager : Singleton<DialogueManager>
     {
-        #region Singleton
-        public static DialogueManager Instance { get; private set; }
-        void Awake()
-        {
-            if (Instance != null && Instance != this)
-            {
-                Destroy(this.gameObject);
-            }
-            else
-            {
-                Instance = this;
-            }
-        }
-        #endregion
-
+        [Tooltip("Starts from this label automatically. Leave empty to start manually")]
+        [SerializeField] private string StartingScene;
+        [Header("Files")]
         [SerializeField] private TextAsset[] DialogueFiles;
         [SerializeField] private TextAsset[] DefinitionFiles;
-        public DialogueUI dialogueUI;
 
         public DialogueEngine DialogueEngine { get; private set; }
 
-
         void Start()
         {
-            VariableManager.Init();
-            SceneManager.Init();
+            VariableDatabase.Init();
+            SceneDatabase.Init();
+            PersistentData.Init();
 
             foreach (TextAsset textAsset in DefinitionFiles)
             {
@@ -44,30 +29,56 @@ namespace DialoguePlus
             }
 
             DialogueEngine = new();
-            DialogueEngine.Init();
 
+            if (!string.IsNullOrWhiteSpace(StartingScene)) StartScene(StartingScene);
         }
         private void Update()
+        {
+            InputUpdate();
+        }
+
+        public void StartScene(string sceneLabel)
+        {
+            DialogueEngine.StartScene(sceneLabel);
+        }
+
+        private void InputUpdate()
         {
             // Will separate input in the future
 
             if (!EventSystem.current.IsPointerOverGameObject(0))
             {
-                if (Input.GetKeyDown(KeyCode.Mouse0))
+                if (!DialogueUI.Instance.IsWaitingForAnswer)
                 {
-                    if (!dialogueUI.IsWaitingForAnswer)
+                    if (Input.GetKeyDown(KeyCode.Mouse0))
+                    {
                         DialogueEngine.AdvanceDialogue();
+                    }
+                    if (Input.GetKeyDown(KeyCode.E))
+                    {
+                        DialogueEngine.AdvanceDialogue();
+                    }
+                }
+                if (Input.GetKeyDown(KeyCode.Q) || Input.mouseScrollDelta.y > 0)
+                {
+                    DialogueEngine.Rollback();
                 }
             }
-            if (Input.GetKeyDown(KeyCode.E))
+
+
+            if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                if (!dialogueUI.IsWaitingForAnswer)
-                    DialogueEngine.AdvanceDialogue();
+                PersistentData.Settings.DialogueSpeed = 1;
             }
-            if (Input.GetKeyDown(KeyCode.Q) || Input.mouseScrollDelta.y > 0)
+            if (Input.GetKeyDown(KeyCode.Alpha2))
             {
-                DialogueEngine.Rollback();
+                PersistentData.Settings.DialogueSpeed = 3;
             }
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                PersistentData.Settings.DialogueSpeed = 5;
+            }
+
         }
 
     }

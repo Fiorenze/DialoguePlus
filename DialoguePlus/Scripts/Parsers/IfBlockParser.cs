@@ -28,17 +28,6 @@ namespace DialoguePlus
             {
                 string currentLine = lines[i].Trim();
 
-                if (string.IsNullOrEmpty(currentLine))
-                {
-                    i++;
-                    continue;
-                }
-                if (currentLine.StartsWith('#'))
-                {
-                    i++;
-                    continue;
-                }
-
                 if (ConditionParser.IsMatch(currentLine))
                 {
                     // This means last condition block is complete
@@ -73,6 +62,10 @@ namespace DialoguePlus
 
                     newBranch.BranchNodes.Add(dialogueNode);
                 }
+                else if (RegexPatterns.ReturnPattern.IsMatch(currentLine))
+                {
+                    newBranch.BranchNodes.Add(new ReturnNode());
+                }
                 else
                 {
                     Debug.LogError($"Unknown line inside conditional block: '{currentLine}'");
@@ -83,10 +76,11 @@ namespace DialoguePlus
 
             // Last condition block is not added before here
             branches.Add(newBranch);
+            completeNode.SetBranches(branches);
 
-            completeNode.DialogueNodeBranches = branches;
             return (completeNode, endLine - 1);
 
         }
     }
+
 }

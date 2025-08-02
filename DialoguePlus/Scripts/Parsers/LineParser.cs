@@ -19,9 +19,8 @@ namespace DialoguePlus
             string speaker = match.Groups[1].Value;
             string dialogueText = match.Groups[2].Value;
 
-            CharacterDefinition characterDefinition = VariableManager.CharacterDefinitions.Find(x => x.Key == speaker);
+            CharacterDefinition characterDefinition = (CharacterDefinition)VariableDatabase.Variables.Find(x => x.Key == speaker);
             Color speakerColor = characterDefinition != null ? characterDefinition.Color : Color.white;
-            speaker = characterDefinition != null ? characterDefinition.Value : speaker;
 
             return (speaker.Trim(), speakerColor, dialogueText.Trim());
         }

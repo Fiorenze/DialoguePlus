@@ -4,106 +4,115 @@
 # So make sure commented lines start with '#'
 
 label start
-	"This is a text based interactive dialogue system."
-	"Even though main purpose is creating dialogues for visual novels, it should work as intended for any type of game with little modification to UI"
-	"No scripts needed for this to work"
-	# will show files screenshot here
-	"You only need at least one file for dialogues and one optional file for definitions if you need them"
-	"Example files have '.dlg' extension for clarity, yet, it should work with '.txt' or any TextAsset type Unity supports"
-	# will show screenshot of definition file
-	"This is what a definition file looks like"
-	"Keyword 'define' used to define characters. define keyword followed by your custom definition"
-	# will show part of dialogue file on the right side
-	"This definition will make writing dialogues easier as you can see on the right side"
-	dev "The last part of character definition is color code in 'html color code'. Character name will be shown in this color"
-	idev "This is how 'idev' looks like. "
-	idev "But be aware italic and other tags like <b>will work</b> for <color=green>TextMeshPro</color> since it will handle those itself, if you change UI, be careful about it!"
-	# will show variable definition
-	"Keyword 'default' allows you to define variables with a default value. Supported types are integer, string and boolean"
-	"Simply write default value; any number for integer, 'True' or 'False' for boolean and any text in quotes for string"
-	"These variables are available to use during runtime. I will show some examples in a minute"
-	"A dialouge file looks like this. Parts of the dialogue can be separated by labels"
-	"By default the dialogue will start from, 'label start'"
-	"In dialogues you can show value of a variable by simply writing like this; {moneyAmount}"
-	"Also you can use actions to change values of these variables. A variable modification action is defined by character '$' for example;"
-	"Currently you have {moneyAmount} money"
-	$ moneyAmount += 50
-	"Now that I have given you 50 more, you have {moneyAmount} money"
-	"Supported operations are; addition (+=), substraction (-=), division (/=), multiplication (*=) and equals (=) which meaning you are giving it a completely new value"
-	"Another action you will use is 'jump' keyword followed by a scene label"
-	"For example 'jump start' will get you to the beginning. I will also show that soon"
-	"You might need conditinal sentences you want to show only if conditions are met"
-	"You can do that with if blocks. For example;"
-	if moneyAmount > 50
-		"You can see this part since your money is over 50, which is {moneyAmount}"
-		$ moneyAmount -= 10
-		"As you can see, you can also add actions here too"
-		"As long as the lines are indented after 'if', 'elif' or 'else' those lines will be accounted for condition block"
-	elif moneyAmount == 50
-		"You will see this line instead if your money equals 50"
-	else 
-		"If both conditions were not met, you would see this line"
-	"Since this line is not indented, this in not part of the conditional block"
-	"'elif' and 'else' blocks are optional and not required everytime"
-	"Another thing to learn is menus. A menu is when you give player options to choose from"
-	"You can start a menu block by 'menu:' keyword. For example;"
-	menu:
-		"Choosing this option will send you to the beginning"
-			jump start
-		"This option has no actions, so, nothing will happen"
-		"This option will give you 500 money"
-			$ moneyAmount += 500
-	dev "Lastly, you can place a menu inside an if block, if you want that menu to be shown depending on the conditions"
-	# show indent pic
-	dev "Be careful with indentation, it is not strict with space amount, but menus and if blocks will continue until they find a line that matches their indent"
-	dev "Rule of thumb is; 'if' 'elif' 'else' 'menu:' keywords must be aligned with dialogue."
-	dev "Conditional parts must be indented respective to the 'if' 'elif' and 'else'"
-	dev "Options must be indented respective to the 'menu:' keyword. Actions of these options must be indented respective to those options"
-	dev "You have finished the tutorial. Have fun!"
 
-label second
-	dev "Oh, you came here"
-	dev "If you have not specified a scene using jump keyword at the end, it will try to find the next label on the same file"
-	dev "If it reaches the end of the file without finding a scene it will jump to another scene on the next file if it exist"
-	dev "Otherwise, it will simply end the dialogue"
+	"This is a text based interactive dialogue system with rollback support"
 	
-label dev
-	"This is a test"
-	"To make sure everything works as intended"
-	"Money is, {moneyAmount}"
-	# Menu test
+	"It is an alternative to node based systems which I think are not suitable for telling long/complicated stories"
+	
+	"With this system you can organize your files as you wish. You may create different files for each mission/character/day etc."
+	
+	"No extra scripts needed for this system to work"
+	
+	"You only need at least one file for dialogues and one optional file for definitions if you need them"
+	
+	"Example files have '.dlg' extension for clarity, yet, it should work with '.txt' or any TextAsset type Unity supports"
+	
+	"You can find example files in Demo/Texts folder."
+	
+	"You need to assign Dialogue and Definition files to DialogueManager"
+	
+	"If you specify a starting scene label in inspector, when you start the game, that dialogue will automatically start"
+	
+	"If you don't want that, simply keep it empty"
+	
+	"Heres the example layout of a dialogue file;"
+	
+	"A dialogue is defined by a label. And started by calling StartScene(sceneLabel) on DialogueManager"
+	
+	"Each line is a node except from if/else blocks and menu block."
+	
+	"On a typical node you may specify a name"
+	
+	Joe "For example this line is told by Joe, which is not defined in definitions file, so you directly see the name Joe"
+	
+	dev "And, this line is told by 'dev' which is a defined name in definitions file with custom color. So, you see the name Developer"
+	
+	"You can also define variables. Supported variable types are; string, integer and boolean"
+	
+	"For example, defined variable 'moneyAmount' is currently {moneyAmount}"
+	
+	"And you can use actions to modify a value, like, $ moneyAmount += 100 (in a separate line not in dialogue line)"
+	
+	"Supported operations are; addition (+=), substraction (-=), division (/=), multiplication (*=) and equals (=) which means you are giving it a completely new value"
+	
+	$ moneyAmount += 100
+	
+	"As you can see current amount of moneyAmount is '{moneyAmount}'"
+	
+	"Also you might want to show some part of the dialogue under certain conditions. For example 'if moneyAmount > 50'"
+	
+	if moneyAmount > 50
+	
+		"You see this line because moneyAmount is over 50"
+		
+		"Conditional sentences must be indented respective to the condition phrase"
+		
+	"Since this line is not indented respective to the condition phrase it is not included in if block"
+	
+	"You can also chain conditions with if/elif/else"
+	
+	if moneyAmount < 10
+		
+		"Your money is less than 10"
+	
+	elif moneyAmount == 50
+	
+		"Your money equals 50"		
+		
+	else 
+	
+		"Your money is over 50"
+		
+	"If any condition is correct, the rest won't be checked"
+	
+	"You may also want to ask questions, or give user some options to choose from. You can use menu: keyword for it"
+	
 	menu:
-		"Option with no action"
-		"Option with jump action"
-			jump second
-		"Option with +50 money"
-			"You chose getting 50 money"
-			$moneyAmount += 50
-		"Option with 2 actions, set 500 money, +20 money"
-			$ moneyAmount = 500
-			$moneyAmount += 20
-	"Now money is, {moneyAmount}"
-	#If test
-	if moneyAmount == 10
-		"Money is still, {moneyAmount}"
-	elif moneyAmount < 100
-		"Money is less then 100, :{moneyAmount}"
-	else
-		"This should mean money is 520, :{moneyAmount}"
-	"Test2: Dialogue with menu start"
-	jump devMenu
+		"This is the first option with no actions"
+		
+		"This option will return to beginning"
+			jump start
+		
+		"Get 150 money and lose 50"
+			$ moneyAmount += 150
+			$ moneyAmount -= 50
+			
+	"Finally, you may have repeated dialogues and don't want to write the same part everywhere"
 	
-label devMenu
+	"For example, you may have a menu that you use as a shop. Then, you can make that part a separate label and call it with call keyword"
+	
+	"When you use call keyword, system creates a return point and when return keyword is called it returns to that point"
+	
+	call shop
+	
+	"Now you have returned to the last label from shop"
+	
+	dev "You have finished the tutorial. Have fun!"
+	
+label shop
 	menu:
-		"Option with nothing"
-		"Yuppee"
-			$moneyAmount -= 50
-	jump dev2
-	
-label dev2
-	"This part will be about scene management. (WIP)"
-	
-	
+		"Buy a lemon for 10$" if hasLemon == False
+			$moneyAmount -= 10
+			$hasLemon = True
+			"You bought a lemon, now you have {moneyAmount}"
+			jump shop
+		"Sell lemon for 8$" if hasLemon == True
+			$moneyAmount += 8
+			$hasLemon = False
+			"You sold a lemon, now you have {moneyAmount}"
+			jump shop
+		"Done"
+			return
 
 
 
